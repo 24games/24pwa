@@ -23,51 +23,76 @@ export default function AppPage() {
     const timer = setTimeout(() => setIsLoading(false), 1000)
     
     const requestNotificationPermission = async () => {
-      if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+      console.log('[Push] Checking notification support...')
+      
+      if (!('Notification' in window)) {
+        console.log('[Push] Notifications not supported')
+        return
+      }
+      
+      if (!('serviceWorker' in navigator)) {
+        console.log('[Push] Service Worker not supported')
         return
       }
 
+      console.log('[Push] Current permission:', Notification.permission)
+
       if (Notification.permission === 'granted') {
+        console.log('[Push] Already granted, subscribing...')
         await subscribeUser()
         return
       }
 
       if (Notification.permission !== 'denied') {
+        console.log('[Push] Requesting permission...')
         const permission = await Notification.requestPermission()
+        console.log('[Push] Permission result:', permission)
         if (permission === 'granted') {
           await subscribeUser()
         }
+      } else {
+        console.log('[Push] Permission was denied previously')
       }
     }
 
     const subscribeUser = async () => {
       try {
+        console.log('[Push] Fetching VAPID key...')
         const response = await fetch('/api/vapid-key')
-        const { publicKey } = await response.json()
+        const data = await response.json()
+        console.log('[Push] VAPID response:', data)
         
-        if (!publicKey) {
-          console.error('VAPID public key not available')
+        if (!data.publicKey) {
+          console.error('[Push] VAPID public key not available')
           return
         }
 
+        console.log('[Push] Waiting for service worker...')
         const registration = await navigator.serviceWorker.ready
+        console.log('[Push] Service worker ready')
         
         let subscription = await registration.pushManager.getSubscription()
+        console.log('[Push] Existing subscription:', subscription)
         
         if (!subscription) {
+          console.log('[Push] Creating new subscription...')
           subscription = await registration.pushManager.subscribe({
             userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(publicKey)
+            applicationServerKey: urlBase64ToUint8Array(data.publicKey)
           })
+          console.log('[Push] New subscription created')
         }
 
-        await fetch('/api/subscribe', {
+        console.log('[Push] Saving subscription to server...')
+        const saveResponse = await fetch('/api/subscribe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(subscription)
         })
+        const saveResult = await saveResponse.json()
+        console.log('[Push] Save result:', saveResult)
       } catch (error) {
-        console.error('Error subscribing to push:', error)
+        console.error('[Push] Error subscribing:', error)
       }
     }
 
