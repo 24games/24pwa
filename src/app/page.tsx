@@ -13,10 +13,12 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera || ''
+    const isIOS = /iPad|iPhone|iPod/.test(userAgent) || 
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
     
     if (isIOS) {
-      window.location.replace('https://24games.cl')
+      window.location.href = 'https://24games.cl'
       return
     }
     
