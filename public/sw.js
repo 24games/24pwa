@@ -1,4 +1,4 @@
-const CACHE_NAME = '24games-pwa-v2';
+const CACHE_NAME = '24games-pwa-v3';
 const urlsToCache = [
   '/',
   '/app',
