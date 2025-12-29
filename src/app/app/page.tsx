@@ -17,7 +17,7 @@ function urlBase64ToUint8Array(base64String: string) {
 
 export default function AppPage() {
   const [isLoading, setIsLoading] = useState(true)
-  const [iframeUrl, setIframeUrl] = useState('https://24games.cl')
+  const [iframeUrl, setIframeUrl] = useState('https://go.aff.24gamespartners.com/x44t4p05?utm_source=instagram&utm_medium=cpc&utm_campaign=adset&utm_term=tatubola')
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 1000)
