@@ -43,12 +43,16 @@ export default function AppPage() {
         return
       }
 
-      if (Notification.permission !== 'denied') {
+      if (Notification.permission === 'default') {
         console.log('[Push] Requesting permission...')
-        const permission = await Notification.requestPermission()
-        console.log('[Push] Permission result:', permission)
-        if (permission === 'granted') {
-          await subscribeUser()
+        try {
+          const permission = await Notification.requestPermission()
+          console.log('[Push] Permission result:', permission)
+          if (permission === 'granted') {
+            await subscribeUser()
+          }
+        } catch (err) {
+          console.error('[Push] Error requesting permission:', err)
         }
       } else {
         console.log('[Push] Permission was denied previously')

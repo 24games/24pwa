@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
 
     const userAgent = request.headers.get('user-agent') || ''
 
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('push_subscribers')
       .upsert({
         endpoint: subscription.endpoint,
@@ -29,16 +29,16 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error('Error saving subscription:', error)
       return NextResponse.json(
-        { error: 'Failed to save subscription' },
+        { error: 'Failed to save subscription', details: error.message },
         { status: 500 }
       )
     }
 
     return NextResponse.json({ success: true })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Subscribe error:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: error.message },
       { status: 500 }
     )
   }
